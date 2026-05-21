@@ -1,33 +1,1423 @@
 <!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <title>Acceso | TecMM Mobility</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Vehicular Profesional</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    /* Estilos personalizados para inputs de fecha oscuros */
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.95);
+    }
+  </style>
 </head>
-<body class="h-full bg-[#0a0f1d] flex items-center justify-center p-4">
-    <div class="w-full max-w-sm bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-2xl">
-        <h1 class="text-white text-2xl font-black mb-6 text-center">TecMM Mobility</h1>
-        
-        <form id="login-form" class="space-y-4">
-            <input type="email" id="email" required placeholder="Correo institucional" 
-                class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-violet-500">
-            
-            <button type="submit" 
-                class="w-full py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl transition-all">
-                Ingresar al Sistema
-            </button>
-        </form>
-    </div>
+<body class="h-full bg-[#0a0f1d] text-slate-100 font-sans flex flex-col md:flex-row overflow-hidden">
 
-    <script>
-        document.getElementById('login-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Guardamos que el usuario ya inició sesión
-            localStorage.setItem('tecmm_auth', 'true');
-            // Redirigimos al dashboard
-            window.location.href = 'dashboard.html';
-        });
-    </script>
+  <!-- Toast de Notificación -->
+  <div id="toast" class="fixed top-4 right-4 z-50 hidden flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border transition-all duration-300 transform translate-y-[-20px] opacity-0">
+    <i data-lucide="sparkles" class="w-5 h-5 flex-shrink-0" id="toast-icon"></i>
+    <span class="text-sm font-medium" id="toast-text">Notificación</span>
+  </div>
+
+  <!-- PANTALLA DE LOGIN (Visible por defecto para iniciar sesión) -->
+  <div id="login-screen" class="fixed inset-0 bg-[#070b14] flex flex-col justify-center items-center p-4 z-50 overflow-hidden">
+    <!-- Decoraciones de Fondo -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"></div>
+
+    <div class="w-full max-w-md bg-slate-900/80 border border-slate-800/80 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden relative z-10 p-8">
+      <div class="flex flex-col items-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-violet-600 to-indigo-650 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/20 mb-4 ring-4 ring-violet-950/40">
+          <i data-lucide="car" class="text-white w-8 h-8"></i>
+        </div>
+        <h1 class="text-2xl font-black text-white tracking-tight uppercase">Control Vehicular</h1>
+        <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest font-semibold">Plataforma Corporativa TSJ</p>
+      </div>
+
+      <form id="login-form" class="space-y-6">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Correo Corporativo</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <i data-lucide="user" class="w-5 h-5"></i>
+            </span>
+            <input 
+              type="email" 
+              id="login-email"
+              value="jvargasarciniega@gmail.com"
+              placeholder="usuario@correo.com" 
+              class="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800/80 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-sm"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Contraseña</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <i data-lucide="lock" class="w-5 h-5"></i>
+            </span>
+            <input 
+              type="password" 
+              id="login-password"
+              value="••••••••"
+              placeholder="••••••••" 
+              class="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800/80 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-sm"
+              required
+            />
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-650 hover:from-violet-500 hover:to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-violet-700/20 transition-all duration-150 transform active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          <span>Ingresar al Sistema</span>
+          <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+      </form>
+
+      <div class="mt-8 pt-6 border-t border-slate-800/60 text-center">
+        <span class="text-xs text-slate-500">Acceso de demostración activo. Pulse "Ingresar".</span>
+      </div>
+    </div>
+    <p class="text-[10px] text-slate-600 mt-6 uppercase tracking-wider">© 2026 Tribunal Superior de Justicia</p>
+  </div>
+
+
+  <!-- ESTRUCTURA PRINCIPAL (SIDEBAR + MAIN) -->
+  <div id="main-layout" class="flex flex-col md:flex-row w-full h-full overflow-hidden hidden">
+    
+    <!-- SIDEBAR DESKTOP -->
+    <aside id="sidebar" class="w-full md:w-64 bg-[#0d1326] border-b md:border-b-0 md:border-r border-slate-800/60 flex flex-col justify-between flex-shrink-0 z-30 transition-all hidden md:flex">
+      <div>
+        <!-- Header Sidebar -->
+        <div class="p-6 border-b border-slate-800/60 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-650 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/15">
+              <i data-lucide="car" class="text-white w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="font-bold text-sm tracking-wide block uppercase text-white">CONTROL</span>
+              <span class="text-[10px] text-violet-400 font-extrabold block -mt-1 tracking-widest">VEHICULAR</span>
+            </div>
+          </div>
+          <button class="md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar(false)">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Perfil Usuario en Sidebar -->
+        <div class="p-4 mx-3 my-4 bg-[#080d1a] rounded-2xl border border-slate-800/40">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-slate-850 rounded-full flex items-center justify-center text-violet-400 font-bold text-xs ring-2 ring-violet-950/50">
+              JV
+            </div>
+            <div class="overflow-hidden">
+              <h4 id="sidebar-user-email" class="text-xs font-semibold text-slate-200 truncate">admin@correo.com</h4>
+              <p class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block animate-pulse"></span>
+                Administrador
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menú de Navegación -->
+        <nav class="px-3 space-y-1">
+          <button 
+            onclick="switchTab('dashboard')"
+            id="nav-dashboard"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>Dashboard Admin</span>
+          </button>
+
+          <button 
+            onclick="switchTab('fleet')"
+            id="nav-fleet"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="car" class="w-4 h-4"></i>
+            <span>Flota de Vehículos</span>
+            <span id="badge-total-fleet" class="ml-auto bg-slate-800/80 text-slate-300 text-xs px-2 py-0.5 rounded-full">17</span>
+          </button>
+
+          <button 
+            onclick="switchTab('reservations')"
+            id="nav-reservations"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span>Reservar Vehículo</span>
+            <span id="badge-reservations" class="ml-auto bg-violet-500/20 text-violet-300 text-xs px-2 py-0.5 rounded-full hidden">0</span>
+          </button>
+
+          <button 
+            onclick="switchTab('logbook')"
+            id="nav-logbook"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+            <span>Bitácora Digital</span>
+            <span id="badge-pending-logs" class="ml-auto bg-amber-500/25 text-amber-400 text-xs px-2 py-0.5 rounded-full hidden">0</span>
+          </button>
+
+          <button 
+            onclick="switchTab('reports')"
+            id="nav-reports"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            <span>Reportes / Salida Rápida</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Botón de Logout -->
+      <div class="p-4 border-t border-slate-850">
+        <button 
+          onclick="handleLogout()"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-rose-950/20 hover:text-rose-400 transition-all"
+        >
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- HEADER MOVIL -->
+    <header class="md:hidden bg-[#0d1326] border-b border-slate-800/60 px-6 py-4 flex items-center justify-between z-20">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
+          <i data-lucide="car" class="text-white w-4 h-4"></i>
+        </div>
+        <span class="font-bold text-sm text-white">CONTROL VEHICULAR</span>
+      </div>
+      <button class="p-2 bg-slate-850 rounded-lg text-slate-300 hover:text-white" onclick="toggleSidebar(true)">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto h-[calc(100vh-68px)] md:h-screen">
+
+      <!-- ========================================================
+          VISTA 1: DASHBOARD
+          ======================================================== -->
+      <section id="tab-dashboard" class="tab-content space-y-8 animate-fadeIn">
+        <div>
+          <h1 class="text-3xl font-black text-white tracking-tight">Dashboard Administrador</h1>
+          <p class="text-slate-400 mt-1">Sistema Integrado para Control de Flota y Asignación Vehicular</p>
+        </div>
+
+        <!-- Métricas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Disponibles</span>
+              <div class="w-8 h-8 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="metric-disponibles" class="text-4xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-500">listos para usar</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">En Uso activo</span>
+              <div class="w-8 h-8 bg-sky-500/10 text-sky-400 rounded-lg flex items-center justify-center">
+                <i data-lucide="car" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="metric-uso" class="text-4xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-500">en ruta</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">En Mantenimiento</span>
+              <div class="w-8 h-8 bg-amber-500/10 text-amber-400 rounded-lg flex items-center justify-center">
+                <i data-lucide="wrench" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="metric-mantenimiento" class="text-4xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-500">en taller</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pendientes</span>
+              <div class="w-8 h-8 bg-rose-500/10 text-rose-400 rounded-lg flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="metric-pendientes" class="text-4xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-500">por revisar</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acceso Rápido -->
+        <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6">
+          <h2 class="text-lg font-bold text-white mb-4">Acciones e Iniciación Directa</h2>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <button onclick="switchTab('fleet')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-violet-950/20 border border-slate-800/60 hover:border-violet-500/35 rounded-xl transition-all group text-center">
+              <div class="w-12 h-12 bg-violet-500/10 text-violet-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="car" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Ver Flota</span>
+            </button>
+
+            <button onclick="switchTab('reservations')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-emerald-950/20 border border-slate-800/60 hover:border-emerald-500/35 rounded-xl transition-all group text-center">
+              <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="calendar" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Nueva Reserva</span>
+            </button>
+
+            <button onclick="switchTab('reports')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-sky-950/20 border border-slate-800/60 hover:border-sky-500/35 rounded-xl transition-all group text-center">
+              <div class="w-12 h-12 bg-sky-500/10 text-sky-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="plus" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Salida Rápida</span>
+            </button>
+
+            <button onclick="switchTab('logbook')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-amber-950/20 border border-slate-800/60 hover:border-amber-500/35 rounded-xl transition-all group text-center">
+              <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Ver Bitácora</span>
+            </button>
+
+            <button onclick="switchTab('reports')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-rose-950/20 border border-slate-800/60 hover:border-rose-500/35 rounded-xl transition-all group text-center col-span-2 md:col-span-1">
+              <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Ver Incidencias</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Secciones Inferiores Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Resumen Estado -->
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <h3 class="text-md font-bold text-white mb-4">Estado General de la Flota</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800/50">
+                  <span class="text-xs text-slate-400">Total de vehículos</span>
+                  <span id="sum-total" class="text-sm font-bold text-white">17</span>
+                </div>
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800/50">
+                  <span class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+                    Disponibles
+                  </span>
+                  <span id="sum-disponibles" class="text-sm font-bold text-emerald-400">0</span>
+                </div>
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800/50">
+                  <span class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-sky-500 rounded-full"></span>
+                    En Uso activo
+                  </span>
+                  <span id="sum-uso" class="text-sm font-bold text-sky-400">0</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                    En Mantenimiento
+                  </span>
+                  <span id="sum-mantenimiento" class="text-sm font-bold text-amber-500">0</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-850 flex items-center gap-2 text-xs text-slate-400 bg-slate-950/40 p-3 rounded-xl">
+              <i data-lucide="sparkles" class="text-violet-400 w-4 h-4 animate-pulse"></i>
+              <span>Actualizado en tiempo real</span>
+            </div>
+          </div>
+
+          <!-- Ultimos Movimientos de Bitacora -->
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-md font-bold text-white">Últimos Registros en Bitácora</h3>
+              <button onclick="switchTab('logbook')" class="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 font-semibold transition-all">
+                <span>Ver toda la bitácora</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <div id="dashboard-recent-logs" class="space-y-4">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+          VISTA 2: FLOTA DE VEHÍCULOS
+          ======================================================== -->
+      <section id="tab-fleet" class="tab-content space-y-8 animate-fadeIn hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-black text-white tracking-tight">Flota de Vehículos</h1>
+            <p class="text-slate-400 mt-1">Monitoreo, estado actual y gestión de mantenimientos</p>
+          </div>
+          <button onclick="switchTab('reservations')" class="bg-gradient-to-r from-violet-600 to-indigo-650 hover:from-violet-500 hover:to-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-violet-500/10 flex items-center justify-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span>Solicitar Reserva</span>
+          </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="bg-[#0d1326] border border-slate-800/60 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div class="relative w-full md:w-80">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <i data-lucide="search" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="text" 
+              id="fleet-search-input"
+              oninput="handleFleetSearch(this.value)"
+              placeholder="Buscar por placa, modelo, tipo..." 
+              class="w-full pl-9 pr-4 py-2 bg-[#070b14] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+            />
+          </div>
+
+          <div class="flex overflow-x-auto gap-2 w-full md:w-auto pb-2 md:pb-0">
+            <button onclick="setFleetFilter('Todos')" id="filter-all" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap bg-slate-800 text-white border border-slate-700">Todos</button>
+            <button onclick="setFleetFilter('Disponible')" id="filter-avail" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap text-slate-400 hover:bg-slate-800/40 hover:text-slate-300">Disponible</button>
+            <button onclick="setFleetFilter('En Uso')" id="filter-use" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap text-slate-400 hover:bg-slate-800/40 hover:text-slate-300">En Uso</button>
+            <button onclick="setFleetFilter('Mantenimiento')" id="filter-maint" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap text-slate-400 hover:bg-slate-800/40 hover:text-slate-300">Mantenimiento</button>
+          </div>
+        </div>
+
+        <!-- Grid de Vehículos -->
+        <div id="fleet-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Rendered Dynamically -->
+        </div>
+      </section>
+
+      <!-- ========================================================
+          VISTA 3: FORMULARIO DE RESERVAS
+          ======================================================== -->
+      <section id="tab-reservations" class="tab-content space-y-8 animate-fadeIn hidden">
+        <div>
+          <h1 class="text-3xl font-black text-white tracking-tight">Reservar Vehículo</h1>
+          <p class="text-slate-400 mt-1">Completa la solicitud de vehículo oficial para traslado corporativo</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Formulario -->
+          <div class="lg:col-span-2 bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6">
+            <h3 class="text-lg font-bold text-white mb-6 border-b border-slate-850 pb-3 font-sans">Información de la Reserva</h3>
+            <form id="reservation-form" onsubmit="submitReservation(event)" class="space-y-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Fecha</label>
+                  <input type="date" id="res-date" required class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Hora</label>
+                  <input type="time" id="res-time" required class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Destino</label>
+                <input type="text" id="res-dest" required placeholder="Ej: Palacio de Justicia, Juzgado Central..." class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Motivo de Solicitud</label>
+                <textarea id="res-reason" rows="3" required placeholder="Describa el motivo oficial de la comisión..." class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Vehículo Disponible</label>
+                <select id="res-vehicle-id" required class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                  <option value="">Seleccionar vehículo disponible</option>
+                  <!-- Rendered Dynamically -->
+                </select>
+              </div>
+
+              <button type="submit" class="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-650 hover:from-violet-500 hover:to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-violet-700/20 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                <span>Solicitar Reserva Directa</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Listado Lateral de Vehículos disponibles -->
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 h-fit space-y-4">
+            <h3 class="text-md font-bold text-white pb-2 border-b border-slate-850">Selección Rápida</h3>
+            <div id="quick-vehicle-selection" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+          VISTA 4: BITÁCORA DIGITAL
+          ======================================================== -->
+      <section id="tab-logbook" class="tab-content space-y-8 animate-fadeIn hidden">
+        <div>
+          <h1 class="text-3xl font-black text-white tracking-tight">Bitácora Digital</h1>
+          <p class="text-slate-400 mt-1">Registro histórico de salidas y estado de llegada de vehículos</p>
+        </div>
+
+        <!-- Mini stats de bitácora -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="bg-slate-900/50 border border-slate-800/70 p-6 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Registros</span>
+              <span id="log-stat-total" class="text-3xl font-extrabold text-white block mt-1">0</span>
+            </div>
+            <div class="p-3 bg-violet-500/10 text-violet-400 rounded-xl">
+              <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="bg-slate-900/50 border border-slate-800/70 p-6 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Estado Correcto</span>
+              <span id="log-stat-correct" class="text-3xl font-extrabold text-emerald-400 block mt-1">0</span>
+            </div>
+            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
+              <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="bg-slate-900/50 border border-slate-800/70 p-6 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Pendientes</span>
+              <span id="log-stat-pending" class="text-3xl font-extrabold text-amber-400 block mt-1">0</span>
+            </div>
+            <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
+              <i data-lucide="clock" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros de búsqueda para bitácora -->
+        <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-4 flex flex-col sm:flex-row gap-4">
+          <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <i data-lucide="search" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="text" 
+              id="log-search-input"
+              oninput="handleLogSearch(this.value)"
+              placeholder="Buscar por vehículo, estado o usuario..." 
+              class="w-full pl-9 pr-4 py-2 bg-[#070b14] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+            />
+          </div>
+          <div class="w-full sm:w-56">
+            <input 
+              type="date" 
+              id="log-date-input"
+              oninput="handleLogDateSearch(this.value)"
+              class="w-full px-4 py-2 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+            />
+          </div>
+          <button id="clear-log-filters" onclick="clearLogFilters()" class="text-xs text-violet-400 hover:text-white flex items-center justify-center px-4 hidden">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 mr-1 animate-spin"></i> Limpiar
+          </button>
+        </div>
+
+        <!-- Listado en Tabla -->
+        <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-800/70 bg-slate-950/20">
+            <h3 class="text-md font-bold text-white">Registros de Movimiento</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800/70 bg-slate-950/45 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <th class="px-6 py-3">Fecha</th>
+                  <th class="px-6 py-3">Vehículo</th>
+                  <th class="px-6 py-3">Km Inicial</th>
+                  <th class="px-6 py-3">Combustible</th>
+                  <th class="px-6 py-3">Estado</th>
+                  <th class="px-6 py-3">Usuario</th>
+                  <th class="px-6 py-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="log-table-body" class="divide-y divide-slate-800/60">
+                <!-- Rendered Dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Detalles amplios de los últimos registros -->
+        <div class="space-y-4">
+          <h3 class="text-md font-bold text-white">Últimos Registros Detallados</h3>
+          <div id="detailed-logs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Rendered Dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+          VISTA 5: REPORTES E INCIDENCIAS / SALIDA DIRECTA
+          ======================================================== -->
+      <section id="tab-reports" class="tab-content space-y-8 animate-fadeIn hidden">
+        <div>
+          <h1 class="text-3xl font-black text-white tracking-tight">Registro Directo y Reportes</h1>
+          <p class="text-slate-400 mt-1 font-medium">Asignación directa de salida de flota o registro de incidencias técnicas</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Formulario salida instantánea -->
+          <div class="lg:col-span-2 bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6">
+            <h3 class="text-lg font-bold text-white mb-6 border-b border-slate-850 pb-3">Registro de Salida Instantánea</h3>
+            <form id="direct-despatch-form" onsubmit="submitDirectDespatch(event)" class="space-y-6">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Seleccionar Vehículo a Despachar</label>
+                <select id="despatch-vehicle-id" required onchange="handleDespatchVehicleChange(this.value)" class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                  <option value="">Seleccionar vehículo</option>
+                  <!-- Rendered Dynamically -->
+                </select>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Kilometraje Inicial de Salida</label>
+                  <input type="number" id="despatch-km" required placeholder="Ej: 15000" class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Porcentaje de Combustible</label>
+                  <input type="number" id="despatch-fuel" min="1" max="100" required placeholder="Ej: 80" class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Destino de la Comisión</label>
+                <input type="text" id="despatch-dest" required placeholder="Dirección o Instalación Judicial destino" class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Justificación / Motivo del Uso</label>
+                <textarea id="despatch-reason" rows="3" required placeholder="Describa el motivo del traslado inmediato..." class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"></textarea>
+              </div>
+
+              <button type="submit" class="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-650 hover:from-violet-500 hover:to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-violet-700/20 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Despachar Vehículo Inmediatamente</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Protocolo lateral -->
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 h-fit space-y-4">
+            <h3 class="text-md font-bold text-white pb-2 border-b border-slate-850 flex items-center gap-1.5 text-amber-400">
+              <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+              <span>Protocolo de Salida</span>
+            </h3>
+            <div class="space-y-3 text-xs text-slate-400 leading-relaxed">
+              <p>1. Verifique visualmente que el vehículo no presente abolladuras nuevas no registradas.</p>
+              <p>2. Confirme que la tarjeta de circulación y póliza de seguro vigente se encuentren en la guantera.</p>
+              <p>3. El nivel de combustible mínimo para viajes fuera de la ciudad es de 50%.</p>
+              <p>4. Ante cualquier percance en ruta, comuníquese inmediatamente al centro de control técnico.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- JAVASCRIPT STATE ENGINE -->
+  <script>
+    // === DATOS INICIALES SEMILLA ===
+    const INITIAL_VEHICLES = [
+      { id: 'TSJ-01', name: 'Camioneta TSJ-01', type: 'Camioneta', km: 15000, fuel: 75, status: 'Disponible' },
+      { id: 'TSJ-02', name: 'Sedán TSJ-02', type: 'Sedán', km: 22000, fuel: 50, status: 'Disponible' },
+      { id: 'TSJ-03', name: 'SUV TSJ-03', type: 'SUV', km: 18260, fuel: 60, status: 'En Uso' },
+      { id: 'TSJ-04', name: 'Camioneta TSJ-04', type: 'Camioneta', km: 12000, fuel: 80, status: 'Disponible' },
+      { id: 'TSJ-05', name: 'Sedán TSJ-05', type: 'Sedán', km: 25000, fuel: 40, status: 'Disponible' },
+      { id: 'TSJ-06', name: 'SUV TSJ-06', type: 'SUV', km: 31200, fuel: 90, status: 'En Uso' },
+      { id: 'TSJ-07', name: 'Camioneta TSJ-07', type: 'Camioneta', km: 8500, fuel: 95, status: 'Mantenimiento' },
+      { id: 'TSJ-08', name: 'SUV TSJ-08', type: 'SUV', km: 14000, fuel: 85, status: 'Disponible' },
+      { id: 'TSJ-09', name: 'Sedán TSJ-09', type: 'Sedán', km: 21000, fuel: 55, status: 'Disponible' },
+      { id: 'TSJ-10', name: 'SUV TSJ-10', type: 'SUV', km: 42000, fuel: 30, status: 'En Uso' },
+      { id: 'TSJ-11', name: 'Camioneta TSJ-11', type: 'Camioneta', km: 16500, fuel: 70, status: 'Disponible' },
+      { id: 'TSJ-12', name: 'Sedán TSJ-12', type: 'Sedán', km: 19800, fuel: 65, status: 'Disponible' },
+      { id: 'TSJ-13', name: 'SUV TSJ-13', type: 'SUV', km: 27400, fuel: 45, status: 'En Uso' },
+      { id: 'TSJ-14', name: 'Camioneta TSJ-14', type: 'Camioneta', km: 34000, fuel: 20, status: 'Mantenimiento' },
+      { id: 'TSJ-15', name: 'Sedán TSJ-15', type: 'Sedán', km: 11000, fuel: 100, status: 'Disponible' },
+      { id: 'TSJ-16', name: 'SUV TSJ-16', type: 'SUV', km: 15300, fuel: 85, status: 'Disponible' },
+      { id: 'TSJ-17', name: 'Camioneta TSJ-17', type: 'Camioneta', km: 29900, fuel: 15, status: 'En Uso' }
+    ];
+
+    const INITIAL_LOGS = [
+      {
+        id: 'LOG-001',
+        fecha: '2026-05-20',
+        vehiculoId: 'TSJ-03',
+        vehiculoName: 'SUV TSJ-03',
+        kmInicial: 18260,
+        combustible: 60,
+        estado: 'Pendiente',
+        usuario: 'admin@correo.com',
+        destino: 'Tribunal Central, Oficina Norte',
+        motivo: 'Traslado de documentos confidenciales y expedientes de juzgado.'
+      },
+      {
+        id: 'LOG-002',
+        fecha: '2026-05-19',
+        vehiculoId: 'TSJ-01',
+        vehiculoName: 'Camioneta TSJ-01',
+        kmInicial: 14880,
+        combustible: 75,
+        estado: 'Correcto',
+        usuario: 'admin@correo.com',
+        destino: 'Juzgado Municipal',
+        motivo: 'Inspección de rutina a las instalaciones periféricas.'
+      }
+    ];
+
+    const INITIAL_RESERVATIONS = [
+      {
+        id: 'RES-001',
+        fecha: '2026-05-22',
+        hora: '09:00',
+        vehiculoId: 'TSJ-01',
+        destino: 'Palacio de Justicia',
+        motivo: 'Asistencia a sesión de pleno ordinario.',
+        usuario: 'admin@correo.com',
+        estado: 'Aprobado'
+      }
+    ];
+
+    // === ESTADO DE LA APLICACIÓN ===
+    // Configurado con 'isAuthenticated: false' para forzar que inicie desde la pantalla de login.
+    let state = {
+      isAuthenticated: false,
+      userEmail: 'jvargasarciniega@gmail.com',
+      activeTab: 'dashboard',
+      vehicles: JSON.parse(localStorage.getItem('fleet_vehicles')) || [...INITIAL_VEHICLES],
+      logs: JSON.parse(localStorage.getItem('fleet_logs')) || [...INITIAL_LOGS],
+      reservations: JSON.parse(localStorage.getItem('fleet_reservations')) || [...INITIAL_RESERVATIONS],
+      selectedFleetFilter: 'Todos',
+      vehicleSearch: '',
+      logSearch: '',
+      logDateFilter: ''
+    };
+
+    // Guardar cambios en local storage para que se mantengan de manera persistente
+    function persistData() {
+      localStorage.setItem('fleet_vehicles', JSON.stringify(state.vehicles));
+      localStorage.setItem('fleet_logs', JSON.stringify(state.logs));
+      localStorage.setItem('fleet_reservations', JSON.stringify(state.reservations));
+    }
+
+    // === TOAST NOTIFICATION ===
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toast-text');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastText.innerText = message;
+      
+      // Estilos según tipo
+      toast.className = `fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border transition-all duration-300 transform translate-y-0 opacity-100`;
+      
+      if (type === 'success') {
+        toast.classList.add('bg-emerald-950', 'text-emerald-200', 'border-emerald-800/40');
+        toastIcon.setAttribute('data-lucide', 'check-circle-2');
+      } else if (type === 'error') {
+        toast.classList.add('bg-rose-950', 'text-rose-200', 'border-rose-800/40');
+        toastIcon.setAttribute('data-lucide', 'alert-triangle');
+      } else {
+        toast.classList.add('bg-slate-900', 'text-violet-200', 'border-violet-800/40');
+        toastIcon.setAttribute('data-lucide', 'sparkles');
+      }
+
+      toast.classList.remove('hidden');
+      lucide.createIcons();
+
+      // Desvanecer
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-20px]');
+        setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 300);
+      }, 3500);
+    }
+
+    // === GESTIÓN DE SEGURIDAD ===
+    function handleLogout() {
+      state.isAuthenticated = false;
+      document.getElementById('main-layout').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      showToast('Sesión cerrada correctamente.', 'info');
+    }
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      if (!email) {
+        showToast('Ingrese un correo corporativo válido', 'error');
+        return;
+      }
+      state.userEmail = email;
+      state.isAuthenticated = true;
+      
+      // Actualizar información
+      document.getElementById('sidebar-user-email').innerText = email;
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-layout').classList.remove('hidden');
+      
+      showToast(`¡Bienvenido de nuevo, ${email}!`, 'success');
+      switchTab('dashboard');
+    });
+
+    // === GESTIÓN DE VISTAS (TABS) ===
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      
+      // Ocultar todos los contenidos
+      document.querySelectorAll('.tab-content').forEach(section => {
+        section.classList.add('hidden');
+      });
+
+      // Mostrar seleccionado
+      const activeSection = document.getElementById(`tab-${tabId}`);
+      if (activeSection) {
+        activeSection.classList.remove('hidden');
+      }
+
+      // Quitar clases activas de barra de navegación
+      document.querySelectorAll('nav text-slate-400').forEach(btn => {
+        btn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white";
+      });
+
+      // Asegurar restauración de las clases inactivas en los otros botones
+      document.querySelectorAll('nav button').forEach(btn => {
+        btn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-850 hover:text-white";
+      });
+
+      // Añadir clase activa al correspondiente (degradado violeta-índigo)
+      const activeBtn = document.getElementById(`nav-${tabId}`);
+      if (activeBtn) {
+        activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-gradient-to-r from-violet-600 to-indigo-650 text-white shadow-lg shadow-violet-500/10";
+      }
+
+      // Cerrar sidebar móvil si está abierto
+      toggleSidebar(false);
+
+      // Renderizar la vista correspondiente
+      renderView();
+    }
+
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById('sidebar');
+      if (open) {
+        sidebar.classList.remove('hidden');
+        sidebar.classList.add('block', 'fixed', 'inset-0', 'w-full', 'h-full', 'p-6', 'bg-[#0d1326]');
+      } else {
+        sidebar.classList.remove('block', 'fixed', 'inset-0', 'w-full', 'h-full', 'p-6', 'bg-[#0d1326]');
+        sidebar.classList.add('hidden', 'md:flex');
+      }
+    }
+
+    // === GESTIÓN DE FLOTA Y MANTENIMIENTOS ===
+    function toggleMaintenance(vehicleId) {
+      state.vehicles = state.vehicles.map(v => {
+        if (v.id === vehicleId) {
+          const isMaint = v.status === 'Mantenimiento';
+          return { ...v, status: isMaint ? 'Disponible' : 'Mantenimiento' };
+        }
+        return v;
+      });
+      persistData();
+      showToast('Estado del vehículo actualizado correctamente.', 'info');
+      renderView();
+    }
+
+    function selectForReservation(vehicleId) {
+      document.getElementById('res-vehicle-id').value = vehicleId;
+      switchTab('reservations');
+      showToast(`Vehículo ${vehicleId} pre-seleccionado`, 'info');
+    }
+
+    // === FILTROS DE FLOTA ===
+    function setFleetFilter(filter) {
+      state.selectedFleetFilter = filter;
+      
+      // Actualizar clases de botones de filtro
+      const filters = {
+        'Todos': 'filter-all',
+        'Disponible': 'filter-avail',
+        'En Uso': 'filter-use',
+        'Mantenimiento': 'filter-maint'
+      };
+
+      Object.keys(filters).forEach(key => {
+        const btn = document.getElementById(filters[key]);
+        if (key === filter) {
+          btn.className = "px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap bg-slate-800 text-white border border-slate-700";
+        } else {
+          btn.className = "px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap text-slate-400 hover:bg-slate-800/40 hover:text-slate-300";
+        }
+      });
+
+      renderFleet();
+    }
+
+    function handleFleetSearch(value) {
+      state.vehicleSearch = value;
+      renderFleet();
+    }
+
+    // === SUBMIT FORMULARIOS ===
+    function submitReservation(e) {
+      e.preventDefault();
+      const date = document.getElementById('res-date').value;
+      const time = document.getElementById('res-time').value;
+      const dest = document.getElementById('res-dest').value;
+      const reason = document.getElementById('res-reason').value;
+      const vehicleId = document.getElementById('res-vehicle-id').value;
+
+      if (!date || !time || !dest || !reason || !vehicleId) {
+        showToast('Por favor completa todos los campos de la reserva.', 'error');
+        return;
+      }
+
+      const targetVehicle = state.vehicles.find(v => v.id === vehicleId);
+      if (!targetVehicle) return;
+
+      // Crear Reserva
+      const newRes = {
+        id: `RES-${Date.now().toString().slice(-4)}`,
+        fecha: date,
+        hora: time,
+        vehiculoId: vehicleId,
+        destino: dest,
+        motivo: reason,
+        usuario: state.userEmail,
+        estado: 'Aprobado'
+      };
+
+      state.reservations.unshift(newRes);
+
+      // Cambiar estado del vehículo a "En Uso"
+      state.vehicles = state.vehicles.map(v => {
+        if (v.id === vehicleId) {
+          return { ...v, status: 'En Uso' };
+        }
+        return v;
+      });
+
+      // Añadir log pendiente automático en Bitácora
+      const newLog = {
+        id: `LOG-${Date.now().toString().slice(-3)}`,
+        fecha: date,
+        vehiculoId: targetVehicle.id,
+        vehiculoName: targetVehicle.name,
+        kmInicial: targetVehicle.km,
+        combustible: targetVehicle.fuel,
+        estado: 'Pendiente',
+        usuario: state.userEmail,
+        destino: dest,
+        motivo: reason
+      };
+      
+      state.logs.unshift(newLog);
+      persistData();
+
+      showToast(`Reserva aprobada y vehículo ${targetVehicle.name} despachado.`, 'success');
+      
+      // Limpiar formulario
+      document.getElementById('reservation-form').reset();
+      
+      // Redirigir a bitácora para ver el cambio
+      switchTab('logbook');
+    }
+
+    function handleDespatchVehicleChange(vehicleId) {
+      const v = state.vehicles.find(item => item.id === vehicleId);
+      if (v) {
+        document.getElementById('despatch-km').value = v.km;
+        document.getElementById('despatch-fuel').value = v.fuel;
+      }
+    }
+
+    function submitDirectDespatch(e) {
+      e.preventDefault();
+      const vehicleId = document.getElementById('despatch-vehicle-id').value;
+      const km = parseInt(document.getElementById('despatch-km').value);
+      const fuel = parseInt(document.getElementById('despatch-fuel').value);
+      const dest = document.getElementById('despatch-dest').value;
+      const reason = document.getElementById('despatch-reason').value;
+
+      if (!vehicleId || !km || !fuel || !dest || !reason) {
+        showToast('Por favor completa todos los campos del despacho.', 'error');
+        return;
+      }
+
+      const targetVehicle = state.vehicles.find(v => v.id === vehicleId);
+      if (!targetVehicle) return;
+
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Registrar en Bitácora
+      const newLog = {
+        id: `LOG-${Date.now().toString().slice(-3)}`,
+        fecha: todayStr,
+        vehiculoId: vehicleId,
+        vehiculoName: targetVehicle.name,
+        kmInicial: km,
+        combustible: fuel,
+        estado: 'Pendiente',
+        usuario: state.userEmail,
+        destino: dest,
+        motivo: reason
+      };
+
+      state.logs.unshift(newLog);
+
+      // Actualizar Vehículo
+      state.vehicles = state.vehicles.map(v => {
+        if (v.id === vehicleId) {
+          return {
+            ...v,
+            status: 'En Uso',
+            km: km,
+            fuel: fuel
+          };
+        }
+        return v;
+      });
+
+      persistData();
+      showToast('Salida rápida registrada exitosamente.', 'success');
+      document.getElementById('direct-despatch-form').reset();
+      switchTab('logbook');
+    }
+
+    function resolveLog(logId) {
+      state.logs = state.logs.map(l => {
+        if (l.id === logId) {
+          // Devolver el vehículo a Disponible e incrementar Km simulado
+          state.vehicles = state.vehicles.map(v => {
+            if (v.id === l.vehiculoId) {
+              return { ...v, status: 'Disponible', km: v.km + 140 };
+            }
+            return v;
+          });
+          return { ...l, estado: 'Correcto' };
+        }
+        return l;
+      });
+      persistData();
+      showToast('Bitácora finalizada y vehículo liberado.', 'success');
+      renderView();
+    }
+
+    // === FILTROS DE BITÁCORA ===
+    function handleLogSearch(value) {
+      state.logSearch = value;
+      toggleClearLogFilterButton();
+      renderLogbook();
+    }
+
+    // Filtro por fecha
+    function handleLogDateSearch(value) {
+      state.logDateFilter = value;
+      toggleClearLogFilterButton();
+      renderLogbook();
+    }
+
+    function toggleClearLogFilterButton() {
+      const btn = document.getElementById('clear-log-filters');
+      if (state.logSearch || state.logDateFilter) {
+        btn.classList.remove('hidden');
+      } else {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function clearLogFilters() {
+      state.logSearch = '';
+      state.logDateFilter = '';
+      document.getElementById('log-search-input').value = '';
+      document.getElementById('log-date-input').value = '';
+      toggleClearLogFilterButton();
+      renderLogbook();
+    }
+
+    // === ENGINE DE RENDERIZACIÓN DILIGENTE ===
+    function calculateStats() {
+      const total = state.vehicles.length;
+      const disponibles = state.vehicles.filter(v => v.status === 'Disponible').length;
+      const enUso = state.vehicles.filter(v => v.status === 'En Uso').length;
+      const mantenimiento = state.vehicles.filter(v => v.status === 'Mantenimiento').length;
+
+      const logsTotal = state.logs.length;
+      const logsCorrectos = state.logs.filter(l => l.estado === 'Correcto').length;
+      const logsPendientes = state.logs.filter(l => l.estado === 'Pendiente').length;
+
+      return { total, disponibles, enUso, mantenimiento, logsTotal, logsCorrectos, logsPendientes };
+    }
+
+    function renderView() {
+      const stats = calculateStats();
+      
+      // Actualizar Badges Generales
+      document.getElementById('badge-total-fleet').innerText = stats.total;
+      
+      const resBadge = document.getElementById('badge-reservations');
+      if (state.reservations.length > 0) {
+        resBadge.innerText = state.reservations.length;
+        resBadge.classList.remove('hidden');
+      } else {
+        resBadge.classList.add('hidden');
+      }
+
+      const logsBadge = document.getElementById('badge-pending-logs');
+      if (stats.logsPendientes > 0) {
+        logsBadge.innerText = stats.logsPendientes;
+        logsBadge.classList.remove('hidden');
+      } else {
+        logsBadge.classList.add('hidden');
+      }
+
+      // Renderizar Tab específico
+      if (state.activeTab === 'dashboard') {
+        renderDashboard(stats);
+      } else if (state.activeTab === 'fleet') {
+        renderFleet();
+      } else if (state.activeTab === 'reservations') {
+        renderReservations();
+      } else if (state.activeTab === 'logbook') {
+        renderLogbook(stats);
+      } else if (state.activeTab === 'reports') {
+        renderReports();
+      }
+
+      lucide.createIcons();
+    }
+
+    // 1. RENDER DASHBOARD
+    function renderDashboard(stats) {
+      document.getElementById('metric-disponibles').innerText = stats.disponibles;
+      document.getElementById('metric-uso').innerText = stats.enUso;
+      document.getElementById('metric-mantenimiento').innerText = stats.mantenimiento;
+      document.getElementById('metric-pendientes').innerText = stats.logsPendientes;
+
+      document.getElementById('sum-disponibles').innerText = stats.disponibles;
+      document.getElementById('sum-uso').innerText = stats.enUso;
+      document.getElementById('sum-mantenimiento').innerText = stats.mantenimiento;
+
+      // Movimientos Recientes (Últimos 3)
+      const container = document.getElementById('dashboard-recent-logs');
+      container.innerHTML = '';
+
+      state.logs.slice(0, 3).forEach(log => {
+        const item = document.createElement('div');
+        item.className = 'p-4 bg-[#0a0f1d] rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-slate-700 transition-all';
+        
+        const badgeColor = log.estado === 'Correcto' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-900/30' : 
+                          log.estado === 'Pendiente' ? 'bg-amber-950/40 text-amber-400 border-amber-900/30' : 
+                          'bg-sky-950/40 text-sky-400 border-sky-900/30';
+
+        item.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-white">${log.vehiculoName}</span>
+              <span class="text-[10px] text-slate-500">• ${log.fecha}</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1 font-medium">Destino: <span class="text-slate-200">${log.destino}</span></p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Usuario: ${log.usuario}</p>
+          </div>
+          <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+            <span class="text-[11px] px-2.5 py-1 rounded-full font-bold border ${badgeColor}">
+              ${log.estado}
+            </span>
+            ${log.estado === 'Pendiente' ? `
+              <button onclick="resolveLog('${log.id}')" class="p-1.5 text-emerald-400 hover:bg-emerald-950/40 rounded-lg border border-emerald-900 transition-all" title="Aprobar de regreso">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    // 2. RENDER FLOTA
+    function renderFleet() {
+      const container = document.getElementById('fleet-grid');
+      container.innerHTML = '';
+
+      const filtered = state.vehicles.filter(v => {
+        const matchesStatus = state.selectedFleetFilter === 'Todos' || v.status === state.selectedFleetFilter;
+        const matchesSearch = v.name.toLowerCase().includes(state.vehicleSearch.toLowerCase()) || 
+                              v.id.toLowerCase().includes(state.vehicleSearch.toLowerCase()) ||
+                              v.type.toLowerCase().includes(state.vehicleSearch.toLowerCase());
+        return matchesStatus && matchesSearch;
+      });
+
+      filtered.forEach(vehicle => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-900/60 border border-slate-800/80 rounded-2xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between";
+        
+        const badgeStatusColor = vehicle.status === 'Disponible' ? 'bg-emerald-950/50 text-emerald-400 border-emerald-500/20' : 
+                                 vehicle.status === 'En Uso' ? 'bg-sky-950/50 text-sky-400 border-sky-500/20' : 
+                                 'bg-amber-950/50 text-amber-400 border-amber-500/20';
+
+        const fuelProgressColor = vehicle.fuel < 25 ? 'bg-rose-500' : 
+                                  vehicle.fuel < 50 ? 'bg-amber-500' : 
+                                  'bg-emerald-500';
+
+        card.innerHTML = `
+          <div class="p-6">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-[11px] bg-[#070b14] text-slate-400 font-bold tracking-widest px-2 py-0.5 rounded-md border border-slate-800/80">${vehicle.id}</span>
+                <h3 class="text-md font-bold text-white mt-2">${vehicle.name}</h3>
+                <p class="text-xs text-slate-500">${vehicle.type}</p>
+              </div>
+              <span class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border ${badgeStatusColor}">
+                ${vehicle.status}
+              </span>
+            </div>
+
+            <div class="mt-6 space-y-4">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="flex items-center gap-1.5 font-medium">
+                  <i data-lucide="gauge" class="w-4 h-4"></i>
+                  Kilometraje
+                </span>
+                <span class="font-bold text-slate-200">${vehicle.km.toLocaleString()} km</span>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                  <span class="flex items-center gap-1.5 font-medium">
+                    <i data-lucide="fuel" class="w-4 h-4"></i>
+                    Combustible
+                  </span>
+                  <span class="font-bold text-slate-200">${vehicle.fuel}%</span>
+                </div>
+                <div class="w-full bg-[#070b14] h-2 rounded-full overflow-hidden">
+                  <div class="h-full ${fuelProgressColor}" style="width: ${vehicle.fuel}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-[#0a0f1d] border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <button onclick="toggleMaintenance('${vehicle.id}')" class="text-xs px-3 py-1.5 rounded-lg font-bold border transition-all flex items-center gap-1 ${vehicle.status === 'Mantenimiento' ? 'border-emerald-800/80 text-emerald-400 hover:bg-emerald-950/20' : 'border-slate-800 text-slate-400 hover:border-amber-800/80 hover:text-amber-400'}">
+              <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
+              <span>${vehicle.status === 'Mantenimiento' ? 'Liberar taller' : 'Mantenimiento'}</span>
+            </button>
+            ${vehicle.status === 'Disponible' ? `
+              <button onclick="selectForReservation('${vehicle.id}')" class="text-xs bg-gradient-to-r from-violet-600 to-indigo-650 hover:from-violet-500 hover:to-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg shadow-md shadow-violet-700/10 transition-all">
+                Reservar
+              </button>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // 3. RENDER RESERVACIONES
+    function renderReservations() {
+      const select = document.getElementById('res-vehicle-id');
+      const sideList = document.getElementById('quick-vehicle-selection');
+
+      // Limpiar select (excepto primera opción vacía)
+      select.innerHTML = '<option value="">Seleccionar vehículo disponible</option>';
+      sideList.innerHTML = '';
+
+      const available = state.vehicles.filter(v => v.status === 'Disponible');
+
+      available.forEach(v => {
+        // Añadir a select dropdown
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.innerText = `${v.name} (${v.id}) — Combustible: ${v.fuel}%`;
+        select.appendChild(opt);
+
+        // Añadir a lista rápida lateral
+        const quickItem = document.createElement('div');
+        quickItem.className = "p-3 rounded-xl border bg-slate-950/30 border-slate-800/60 text-slate-400 hover:border-violet-500/40 cursor-pointer transition-all flex items-center justify-between";
+        quickItem.onclick = function() {
+          select.value = v.id;
+          showToast(`Vehículo ${v.name} asignado en el formulario.`, 'info');
+        };
+
+         
+
+           
+        quickItem.innerHTML = `
+          <div>
+            <span class="text-[11px] font-bold text-slate-200 block">${v.name}</span>
+            <span class="text-[10px] text-slate-500">${v.km.toLocaleString()} km</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[11px] font-bold text-emerald-400 block">${v.fuel}% combustible</span>
+          </div>
+        `;
+        sideList.appendChild(quickItem);
+      });
+    }
+
+    // 4. RENDER BITÁCORA
+    function renderLogbook(stats) {
+      if (!stats) stats = calculateStats();
+      
+      document.getElementById('log-stat-total').innerText = stats.logsTotal;
+      document.getElementById('log-stat-correct').innerText = stats.logsCorrectos;
+      document.getElementById('log-stat-pending').innerText = stats.logsPendientes;
+
+      const tableBody = document.getElementById('log-table-body');
+      tableBody.innerHTML = '';
+
+      const filteredLogs = state.logs.filter(l => {
+        const matchesSearch = l.vehiculoName.toLowerCase().includes(state.logSearch.toLowerCase()) ||
+                              l.usuario.toLowerCase().includes(state.logSearch.toLowerCase()) ||
+                              l.estado.toLowerCase().includes(state.logSearch.toLowerCase()) ||
+                              l.id.toLowerCase().includes(state.logSearch.toLowerCase());
+        const matchesDate = !state.logDateFilter || l.fecha === state.logDateFilter;
+        return matchesSearch && matchesDate;
+      });
+
+      filteredLogs.forEach(log => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/20 transition-all text-xs border-b border-slate-800/50';
+        
+        const badgeColor = log.estado === 'Correcto' ? 'bg-emerald-950/50 text-emerald-400 border-emerald-900/30' : 
+                          log.estado === 'Pendiente' ? 'bg-amber-950/50 text-amber-400 border-amber-900/30' : 
+                          'bg-sky-950/50 text-sky-400 border-sky-900/30';
+
+        tr.innerHTML = `
+          <td class="px-6 py-4 text-slate-300 font-medium">${log.fecha}</td>
+          <td class="px-6 py-4 font-bold text-white">${log.vehiculoName}</td>
+          <td class="px-6 py-4 text-slate-400">${log.kmInicial.toLocaleString()} km</td>
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-1.5">
+              <span class="font-semibold text-slate-300">${log.combustible}%</span>
+              <div class="w-12 bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                <div class="h-full bg-violet-500" style="width: ${log.combustible}%"></div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border ${badgeColor}">
+              ${log.estado}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-slate-400">${log.usuario}</td>
+          <td class="px-6 py-4 text-right">
+            ${log.estado === 'Pendiente' ? `
+              <button onclick="resolveLog('${log.id}')" class="px-2.5 py-1 bg-emerald-950 text-emerald-400 hover:bg-emerald-900 rounded-lg text-[11px] font-bold transition-all border border-emerald-800">
+                Marcar Correcto
+              </button>
+            ` : '<span class="text-slate-500 italic text-[11px]">Cerrado</span>'}
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      // Detallados inferiores
+      const detailedGrid = document.getElementById('detailed-logs-grid');
+      detailedGrid.innerHTML = '';
+
+      state.logs.slice(0, 2).forEach(log => {
+        const detailCard = document.createElement('div');
+        detailCard.className = "bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 relative";
+        
+        const badgeColor = log.estado === 'Correcto' ? 'bg-emerald-950/50 text-emerald-400 border-emerald-900/25' : 'bg-amber-950/50 text-amber-400 border-amber-900/25';
+
+        detailCard.innerHTML = `
+          <div class="absolute top-6 right-6">
+            <span class="text-[10px] px-2.5 py-1 rounded-full font-bold uppercase border ${badgeColor}">
+              ${log.estado}
+            </span>
+          </div>
+          <h4 class="text-lg font-bold text-white">${log.vehiculoName}</h4>
+          <span class="text-xs text-slate-400 block mt-1 capitalize">${log.fecha}</span>
+
+          <div class="grid grid-cols-2 gap-4 my-6">
+            <div>
+              <span class="text-[10px] uppercase text-slate-500 block">Kilometraje Inicial</span>
+              <span class="text-md font-extrabold text-slate-200">${log.kmInicial.toLocaleString()} km</span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase text-slate-500 block">Combustible Inicial</span>
+              <span class="text-md font-extrabold text-slate-200">${log.combustible}%</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 border-t border-slate-800/50 pt-4">
+            <p class="text-xs text-slate-400"><strong class="text-slate-300">Observaciones:</strong> {log.motivo}</p>
+            <p class="text-xs text-slate-400"><strong class="text-slate-300">Destino de la ruta:</strong> ${log.destino}</p>
+            <p class="text-[11px] text-slate-500 font-medium">Usuario registrado: ${log.usuario}</p>
+          </div>
+        `;
+        detailedGrid.appendChild(detailCard);
+      });
+    }
+
+    // 5. RENDER REPORTES / DESPACHO INMEDIATO
+    function renderReports() {
+      const select = document.getElementById('despatch-vehicle-id');
+      select.innerHTML = '<option value="">Seleccionar vehículo</option>';
+
+      const available = state.vehicles.filter(v => v.status === 'Disponible');
+
+      available.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.innerText = `${v.name} (${v.id}) — ${v.km.toLocaleString()} km`;
+        select.appendChild(opt);
+      });
+    }
+
+    // === INICIALIZACIÓN DE LA PÁGINA ===
+    window.addEventListener('DOMContentLoaded', () => {
+      if (state.isAuthenticated) {
+        document.getElementById('sidebar-user-email').innerText = state.userEmail;
+        document.getElementById('main-layout').classList.remove('hidden');
+        document.getElementById('login-screen').classList.add('hidden');
+        switchTab('dashboard');
+      } else {
+        document.getElementById('main-layout').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+      }
+      lucide.createIcons();
+    });
+  </script>
 </body>
 </html>
