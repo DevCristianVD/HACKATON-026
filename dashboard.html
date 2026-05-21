@@ -2,44 +2,32 @@
 <html lang="es" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - TecMM</title>
+    <title>Dashboard | TecMM</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="h-full bg-[#0a0f1d] text-slate-100 flex overflow-hidden">
+<body class="h-full bg-[#0a0f1d] text-white">
 
-    <aside class="w-64 bg-[#0d1326] border-r border-slate-800/60 flex flex-col hidden md:flex">
-        <div class="p-6 font-bold text-white uppercase tracking-wider">TecMM TMI</div>
-        <nav class="p-3 space-y-1">
-            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-violet-600 text-white">
-                <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Dashboard
-            </a>
-            <a href="flota.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800/40">
-                <i data-lucide="car" class="w-4 h-4"></i> Flota
-            </a>
-        </nav>
-    </aside>
+    <script>
+        if (localStorage.getItem('tecmm_auth') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
 
-    <main class="flex-1 p-10 overflow-y-auto">
-        <h1 class="text-2xl font-bold mb-8">Dashboard de Control</h1>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-                <p class="text-slate-400 text-xs uppercase">Unidades Totales</p>
-                <p id="stat-total" class="text-4xl font-bold mt-2 text-white">0</p>
-            </div>
-        </div>
+    <nav class="p-6 border-b border-slate-800 flex justify-between items-center">
+        <h1 class="font-bold text-xl">Sistema de Control Vehicular</h1>
+        <button onclick="logout()" class="text-xs text-slate-400 hover:text-red-400">Cerrar Sesión</button>
+    </nav>
+
+    <main class="p-8">
+        <h2 class="text-2xl font-bold">Bienvenido, Operador</h2>
+        <p class="text-slate-400 mt-2">Esta es tu pantalla de inicio segura.</p>
     </main>
 
-    <script src="js/clases.js"></script>
     <script>
-        // Verificación de sesión simple
-        if (!localStorage.getItem('tecmm_auth')) window.location.href = 'login.html';
-        
-        lucide.createIcons();
-        
-        // Uso de clases
-        const stats = flota.calcularEstadisticas();
-        document.getElementById('stat-total').innerText = stats.total;
+        function logout() {
+            localStorage.removeItem('tecmm_auth');
+            window.location.href = 'index.html';
+        }
     </script>
 </body>
 </html>
