@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Vehicular - Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="h-full bg-[#0a0f1d] text-slate-100 font-sans flex flex-col md:flex-row overflow-hidden">
+
+  <!-- Toast de Notificación -->
+  <div id="toast" class="fixed top-4 right-4 z-50 hidden flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border transition-all duration-300 transform translate-y-[-20px] opacity-0">
+    <i data-lucide="sparkles" class="w-5 h-5 flex-shrink-0" id="toast-icon"></i>
+    <span class="text-sm font-medium" id="toast-text">Notificación</span>
+  </div>
+
+  <!-- ESTRUCTURA PRINCIPAL (SIDEBAR + MAIN) -->
+  <div class="flex flex-col md:flex-row w-full h-full overflow-hidden">
+    
+    <!-- SIDEBAR DESKTOP -->
+    <aside id="sidebar" class="w-full md:w-64 bg-[#0d1326] border-b md:border-b-0 md:border-r border-slate-800/60 flex flex-col justify-between flex-shrink-0 z-30 transition-all hidden md:flex">
+      <div>
+        <!-- Header Sidebar -->
+        <div class="p-6 border-b border-slate-800/60 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-650 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/15">
+              <i data-lucide="car" class="text-white w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="font-bold text-sm tracking-wide block uppercase text-white">CONTROL</span>
+              <span class="text-[10px] text-violet-400 font-extrabold block -mt-1 tracking-widest">VEHICULAR</span>
+            </div>
+          </div>
+          <button class="md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar(false)">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Perfil Usuario en Sidebar -->
+        <div class="p-4 mx-3 my-4 bg-[#080d1a] rounded-2xl border border-slate-800/40">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-slate-850 rounded-full flex items-center justify-center text-violet-400 font-bold text-xs ring-2 ring-violet-950/50">
+              JV
+            </div>
+            <div class="overflow-hidden">
+              <h4 id="sidebar-user-email" class="text-xs font-semibold text-slate-200 truncate">admin@correo.com</h4>
+              <p class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block animate-pulse"></span>
+                Administrador
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menú de Navegación -->
+        <nav class="px-3 space-y-1">
+          <button 
+            onclick="switchTab('dashboard')"
+            id="nav-dashboard"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-gradient-to-r from-violet-600 to-indigo-650 text-white shadow-lg shadow-violet-500/10"
+          >
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>Dashboard Admin</span>
+          </button>
+
+          <button 
+            onclick="switchTab('fleet')"
+            id="nav-fleet"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="car" class="w-4 h-4"></i>
+            <span>Flota de Vehículos</span>
+            <span id="badge-total-fleet" class="ml-auto bg-slate-800/80 text-slate-300 text-xs px-2 py-0.5 rounded-full">17</span>
+          </button>
+
+          <button 
+            onclick="switchTab('reservations')"
+            id="nav-reservations"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span>Reservar Vehículo</span>
+            <span id="badge-reservations" class="ml-auto bg-violet-500/20 text-violet-300 text-xs px-2 py-0.5 rounded-full hidden">0</span>
+          </button>
+
+          <button 
+            onclick="switchTab('logbook')"
+            id="nav-logbook"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+            <span>Bitácora Digital</span>
+            <span id="badge-pending-logs" class="ml-auto bg-amber-500/25 text-amber-400 text-xs px-2 py-0.5 rounded-full hidden">0</span>
+          </button>
+
+          <button 
+            onclick="switchTab('reports')"
+            id="nav-reports"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white"
+          >
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            <span>Reportes / Salida Rápida</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Botón de Logout -->
+      <div class="p-4 border-t border-slate-850">
+        <button 
+          onclick="handleLogout()"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-rose-950/20 hover:text-rose-400 transition-all"
+        >
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- HEADER MOVIL -->
+    <header class="md:hidden bg-[#0d1326] border-b border-slate-800/60 px-6 py-4 flex items-center justify-between z-20">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
+          <i data-lucide="car" class="text-white w-4 h-4"></i>
+        </div>
+        <span class="font-bold text-sm text-white">CONTROL VEHICULAR</span>
+      </div>
+      <button class="p-2 bg-slate-850 rounded-lg text-slate-300 hover:text-white" onclick="toggleSidebar(true)">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto h-[calc(100vh-68px)] md:h-screen">
+
+      <!-- VISTA DASHBOARD -->
+      <section id="tab-dashboard" class="tab-content space-y-8 animate-fadeIn">
+        <div>
+          <h1 class="text-3xl font-black text-white tracking-tight">Dashboard Administrador</h1>
+          <p class="text-slate-400 mt-1">Sistema Integrado para Control de Flota y Asignación Vehicular</p>
+        </div>
+
+        <!-- Métricas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Disponibles</span>
+              <div class="w-8 h-8 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="metric-disponibles" class="text-4xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-500">listos para usar</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">En Uso activo</span>
+              <div class="w-8 h-8 bg-sky-500/10 text-sky-400 rounded-lg flex items-center justify-center">
+                <i data-lucide="car" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="metric-uso" class="text-4xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-500">en ruta</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">En Mantenimiento</span>
+              <div class="w-8 h-8 bg-amber-500/10 text-amber-400 rounded-lg flex items-center justify-center">
+                <i data-lucide="wrench" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="metric-mantenimiento" class="text-4xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-500">en taller</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pendientes</span>
+              <div class="w-8 h-8 bg-rose-500/10 text-rose-400 rounded-lg flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="metric-pendientes" class="text-4xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-500">por revisar</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acceso Rápido -->
+        <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6">
+          <h2 class="text-lg font-bold text-white mb-4">Acciones e Iniciación Directa</h2>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <button onclick="switchTab('fleet')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-violet-950/20 border border-slate-800/60 hover:border-violet-500/35 rounded-xl transition-all group text-center">
+              <div class="w-12 h-12 bg-violet-500/10 text-violet-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="car" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Ver Flota</span>
+            </button>
+
+            <button onclick="switchTab('reservations')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-emerald-950/20 border border-slate-800/60 hover:border-emerald-500/35 rounded-xl transition-all group text-center">
+              <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="calendar" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Nueva Reserva</span>
+            </button>
+
+            <button onclick="switchTab('reports')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-sky-950/20 border border-slate-800/60 hover:border-sky-500/35 rounded-xl transition-all group text-center">
+              <div class="w-12 h-12 bg-sky-500/10 text-sky-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="plus" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Salida Rápida</span>
+            </button>
+
+            <button onclick="switchTab('logbook')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-amber-950/20 border border-slate-800/60 hover:border-amber-500/35 rounded-xl transition-all group text-center">
+              <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Ver Bitácora</span>
+            </button>
+
+            <button onclick="switchTab('reports')" class="flex flex-col items-center justify-center p-4 bg-[#0a0f1d] hover:bg-rose-950/20 border border-slate-800/60 hover:border-rose-500/35 rounded-xl transition-all group text-center col-span-2 md:col-span-1">
+              <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-200">Ver Incidencias</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Secciones Inferiores Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Resumen Estado -->
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <h3 class="text-md font-bold text-white mb-4">Estado General de la Flota</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800/50">
+                  <span class="text-xs text-slate-400">Total de vehículos</span>
+                  <span id="sum-total" class="text-sm font-bold text-white">17</span>
+                </div>
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800/50">
+                  <span class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+                    Disponibles
+                  </span>
+                  <span id="sum-disponibles" class="text-sm font-bold text-emerald-400">0</span>
+                </div>
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800/50">
+                  <span class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-sky-500 rounded-full"></span>
+                    En Uso activo
+                  </span>
+                  <span id="sum-uso" class="text-sm font-bold text-sky-400">0</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+                    En Mantenimiento
+                  </span>
+                  <span id="sum-mantenimiento" class="text-sm font-bold text-amber-500">0</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-850 flex items-center gap-2 text-xs text-slate-400 bg-slate-950/40 p-3 rounded-xl">
+              <i data-lucide="sparkles" class="text-violet-400 w-4 h-4 animate-pulse"></i>
+              <span>Actualizado en tiempo real</span>
+            </div>
+          </div>
+
+          <!-- Últimos Movimientos de Bitácora -->
+          <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-md font-bold text-white">Últimos Registros en Bitácora</h3>
+              <button onclick="switchTab('logbook')" class="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 font-semibold transition-all">
+                <span>Ver toda la bitácora</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <div id="dashboard-recent-logs" class="space-y-4">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="assets.js"></script>
+</body>
+</html>

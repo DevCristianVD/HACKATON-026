@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Vehicular - Reservar Vehículo</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.95);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#0a0f1d] text-slate-100 font-sans flex flex-col md:flex-row overflow-hidden">
+
+  <!-- Toast de Notificación -->
+  <div id="toast" class="fixed top-4 right-4 z-50 hidden flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border transition-all duration-300 transform translate-y-[-20px] opacity-0">
+    <i data-lucide="sparkles" class="w-5 h-5 flex-shrink-0" id="toast-icon"></i>
+    <span class="text-sm font-medium" id="toast-text">Notificación</span>
+  </div>
+
+  <!-- SIDEBAR DESKTOP -->
+  <aside id="sidebar" class="w-full md:w-64 bg-[#0d1326] border-b md:border-b-0 md:border-r border-slate-800/60 flex flex-col justify-between flex-shrink-0 z-30 transition-all hidden md:flex">
+    <div>
+      <div class="p-6 border-b border-slate-800/60 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-650 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/15">
+            <i data-lucide="car" class="text-white w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="font-bold text-sm tracking-wide block uppercase text-white">CONTROL</span>
+            <span class="text-[10px] text-violet-400 font-extrabold block -mt-1 tracking-widest">VEHICULAR</span>
+          </div>
+        </div>
+        <button class="md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar(false)">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 mx-3 my-4 bg-[#080d1a] rounded-2xl border border-slate-800/40">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-slate-850 rounded-full flex items-center justify-center text-violet-400 font-bold text-xs ring-2 ring-violet-950/50">
+            JV
+          </div>
+          <div class="overflow-hidden">
+            <h4 id="sidebar-user-email" class="text-xs font-semibold text-slate-200 truncate">admin@correo.com</h4>
+            <p class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+              <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block animate-pulse"></span>
+              Administrador
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="px-3 space-y-1">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Dashboard Admin</span>
+        </button>
+        <button onclick="switchTab('fleet')" id="nav-fleet" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="car" class="w-4 h-4"></i>
+          <span>Flota de Vehículos</span>
+          <span id="badge-total-fleet" class="ml-auto bg-slate-800/80 text-slate-300 text-xs px-2 py-0.5 rounded-full">17</span>
+        </button>
+        <button onclick="switchTab('reservations')" id="nav-reservations" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-gradient-to-r from-violet-600 to-indigo-650 text-white shadow-lg shadow-violet-500/10">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>Reservar Vehículo</span>
+          <span id="badge-reservations" class="ml-auto bg-violet-500/20 text-violet-300 text-xs px-2 py-0.5 rounded-full hidden">0</span>
+        </button>
+        <button onclick="switchTab('logbook')" id="nav-logbook" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          <span>Bitácora Digital</span>
+          <span id="badge-pending-logs" class="ml-auto bg-amber-500/25 text-amber-400 text-xs px-2 py-0.5 rounded-full hidden">0</span>
+        </button>
+        <button onclick="switchTab('reports')" id="nav-reports" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Reportes / Salida Rápida</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="p-4 border-t border-slate-850">
+      <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-rose-950/20 hover:text-rose-400 transition-all">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- HEADER MOVIL -->
+  <header class="md:hidden bg-[#0d1326] border-b border-slate-800/60 px-6 py-4 flex items-center justify-between z-20">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
+        <i data-lucide="car" class="text-white w-4 h-4"></i>
+      </div>
+      <span class="font-bold text-sm text-white">CONTROL VEHICULAR</span>
+    </div>
+    <button class="p-2 bg-slate-850 rounded-lg text-slate-300 hover:text-white" onclick="toggleSidebar(true)">
+      <i data-lucide="menu" class="w-5 h-5"></i>
+    </button>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto h-[calc(100vh-68px)] md:h-screen">
+
+    <!-- VISTA RESERVACIONES -->
+    <section id="tab-reservations" class="tab-content space-y-8 animate-fadeIn">
+      <div>
+        <h1 class="text-3xl font-black text-white tracking-tight">Reservar Vehículo</h1>
+        <p class="text-slate-400 mt-1">Completa la solicitud de vehículo oficial para traslado corporativo</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Formulario -->
+        <div class="lg:col-span-2 bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6">
+          <h3 class="text-lg font-bold text-white mb-6 border-b border-slate-850 pb-3 font-sans">Información de la Reserva</h3>
+          <form id="reservation-form" onsubmit="submitReservation(event)" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Fecha</label>
+                <input type="date" id="res-date" required class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Hora</label>
+                <input type="time" id="res-time" required class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Destino</label>
+              <input type="text" id="res-dest" required placeholder="Ej: Palacio de Justicia, Juzgado Central..." class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Motivo de Solicitud</label>
+              <textarea id="res-reason" rows="3" required placeholder="Describa el motivo oficial de la comisión..." class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Vehículo Disponible</label>
+              <select id="res-vehicle-id" required class="w-full px-4 py-2.5 bg-[#070b14] border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm">
+                <option value="">Seleccionar vehículo disponible</option>
+              </select>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-650 hover:from-violet-500 hover:to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-violet-700/20 transition-all flex items-center justify-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span>Solicitar Reserva Directa</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Listado Lateral de Vehículos disponibles -->
+        <div class="bg-slate-900/50 border border-slate-800/70 rounded-2xl p-6 h-fit space-y-4">
+          <h3 class="text-md font-bold text-white pb-2 border-b border-slate-850">Selección Rápida</h3>
+          <div id="quick-vehicle-selection" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+            <!-- Rendered Dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets.js"></script>
+</body>
+</html>
