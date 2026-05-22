@@ -1,0 +1,2 @@
+id,fecha,hora,vehiculoId,destino,motivo,usuario,estado
+RES-001,2026-05-22,09:00,TSJ-01,"Palacio de Justicia","Asistencia a sesión de pleno ordinario.",admin@correo.com,Aprobado

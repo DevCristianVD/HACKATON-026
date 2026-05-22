@@ -1,4 +1,4 @@
-// === DATOS INICIALES SEMILLA ===
+// === DATOS INICIALES SEMILLA (respaldo si no se carga el CSV) ===
 const INITIAL_VEHICLES = [
   { id: 'TSJ-01', name: 'Camioneta TSJ-01', type: 'Camioneta', km: 15000, fuel: 75, status: 'Disponible' },
   { id: 'TSJ-02', name: 'Sedán TSJ-02', type: 'Sedán', km: 22000, fuel: 50, status: 'Disponible' },
@@ -59,13 +59,115 @@ const INITIAL_RESERVATIONS = [
   }
 ];
 
+const DATA_BASE_PATH = 'data';
+
+function parseCSVLine(line) {
+  const values = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (inQuotes) {
+      if (char === '"') {
+        if (line[i + 1] === '"') {
+          current += '"';
+          i += 1;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        values.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+  }
+
+  values.push(current);
+  return values.map(value => value.trim());
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/).filter(line => line.trim() !== '');
+  if (lines.length === 0) return [];
+
+  const headers = parseCSVLine(lines[0]);
+  return lines.slice(1).map(line => {
+    const values = parseCSVLine(line);
+    const item = {};
+    headers.forEach((header, index) => {
+      item[header] = values[index] ?? '';
+    });
+    return item;
+  });
+}
+
+function normalizeCSVData(rows) {
+  return rows.map(item => {
+    const normalized = {};
+    for (const key in item) {
+      if (Object.prototype.hasOwnProperty.call(item, key)) {
+        const value = item[key];
+        if (['km', 'fuel', 'kmInicial'].includes(key)) {
+          normalized[key] = Number(value) || 0;
+        } else {
+          normalized[key] = value;
+        }
+      }
+    }
+    return normalized;
+  });
+}
+
+async function loadCSVFile(fileName) {
+  const response = await fetch(`${DATA_BASE_PATH}/${fileName}`);
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar ${fileName}: ${response.status}`);
+  }
+  const text = await response.text();
+  return normalizeCSVData(parseCSV(text));
+}
+
+async function loadInitialData() {
+  try {
+    const [vehicles, logs, reservations] = await Promise.all([
+      loadCSVFile('vehicles.csv'),
+      loadCSVFile('logs.csv'),
+      loadCSVFile('reservations.csv')
+    ]);
+
+    state.vehicles = vehicles;
+    state.logs = logs;
+    state.reservations = reservations;
+  } catch (error) {
+    console.warn('Carga de archivos CSV fallida, usando datos locales o persistidos.', error);
+
+    const localVehicles = JSON.parse(localStorage.getItem('fleet_vehicles'));
+    const localLogs = JSON.parse(localStorage.getItem('fleet_logs'));
+    const localReservations = JSON.parse(localStorage.getItem('fleet_reservations'));
+
+    state.vehicles = localVehicles || [...INITIAL_VEHICLES];
+    state.logs = localLogs || [...INITIAL_LOGS];
+    state.reservations = localReservations || [...INITIAL_RESERVATIONS];
+  }
+}
+
 // === ESTADO DE LA APLICACIÓN ===
 let state = {
   userEmail: localStorage.getItem('userEmail') || 'jvargasarciniega@gmail.com',
   activeTab: 'dashboard',
-  vehicles: JSON.parse(localStorage.getItem('fleet_vehicles')) || [...INITIAL_VEHICLES],
-  logs: JSON.parse(localStorage.getItem('fleet_logs')) || [...INITIAL_LOGS],
-  reservations: JSON.parse(localStorage.getItem('fleet_reservations')) || [...INITIAL_RESERVATIONS],
+  vehicles: [],
+  logs: [],
+  reservations: [],
   selectedFleetFilter: 'Todos',
   vehicleSearch: '',
   logSearch: '',
@@ -749,11 +851,13 @@ function renderReports() {
 }
 
 // === INICIALIZACIÓN ===
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   const sidebarUserEmail = document.getElementById('sidebar-user-email');
   if (sidebarUserEmail) {
     sidebarUserEmail.innerText = state.userEmail;
   }
+
+  await loadInitialData();
 
   state.activeTab = getCurrentPageTab();
   renderView();

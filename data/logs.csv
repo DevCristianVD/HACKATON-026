@@ -1,0 +1,3 @@
+id,fecha,vehiculoId,vehiculoName,kmInicial,combustible,estado,usuario,destino,motivo
+LOG-001,2026-05-20,TSJ-03,"SUV TSJ-03",18260,60,Pendiente,admin@correo.com,"Tribunal Central, Oficina Norte","Traslado de documentos confidenciales y expedientes de juzgado."
+LOG-002,2026-05-19,TSJ-01,"Camioneta TSJ-01",14880,75,Correcto,admin@correo.com,"Juzgado Municipal","Inspección de rutina a las instalaciones periféricas."

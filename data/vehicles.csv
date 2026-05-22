@@ -1,0 +1,11 @@
+id,name,type,km,fuel,status
+TSJ-01,Camioneta TSJ-01,Camioneta,15000,75,Disponible
+TSJ-02,Sedán TSJ-02,Sedán,22000,50,Disponible
+TSJ-03,SUV TSJ-03,SUV,18260,60,En Uso
+TSJ-04,Camioneta TSJ-04,Camioneta,12000,80,Disponible
+TSJ-05,Sedán TSJ-05,Sedán,25000,40,Disponible
+TSJ-06,SUV TSJ-06,SUV,31200,90,En Uso
+TSJ-07,Camioneta TSJ-07,Camioneta,8500,95,Mantenimiento
+TSJ-08,SUV TSJ-08,SUV,14000,85,Disponible
+TSJ-09,Sedán TSJ-09,Sedán,21000,55,Disponible
+TSJ-10,SUV TSJ-10,SUV,42000,30,En Uso
